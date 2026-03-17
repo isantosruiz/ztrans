@@ -2,12 +2,86 @@ import sympy as sp
 from sympy.core.function import AppliedUndef
 from sympy.functions.special.tensor_functions import KroneckerDelta as _SympyKroneckerDelta
 
-__all__ = ["KroneckerDelta", "z_transform", "inverse_z_transform"]
+__all__ = [
+    "KroneckerDelta",
+    "ZTransform",
+    "InverseZTransform",
+    "z_correspondence",
+    "z_initial_conds",
+    "z_transform",
+    "inverse_z_transform",
+]
 
 
 def KroneckerDelta(a, b=0):
     """Return Kronecker delta with default second argument b=0."""
     return _SympyKroneckerDelta(a, b)
+
+
+class ZTransform(sp.Function):
+    """Symbolic placeholder for unevaluated unilateral Z-transform."""
+
+    nargs = (3,)
+
+
+class InverseZTransform(sp.Function):
+    """Symbolic placeholder for unevaluated unilateral inverse Z-transform."""
+
+    nargs = (3,)
+
+
+def z_correspondence(f, fdict, /):
+    """Replace formal Z-transform placeholders using function correspondences.
+
+    Similar to SymPy's ``laplace_correspondence``:
+    - ``ZTransform(y(n), n, z)`` -> ``Y(z)``
+    - ``InverseZTransform(Y(z), z, n)`` -> ``y(n)``
+    - ``Sum(y(n)*z**(-n), (n, 0, oo))`` -> ``Y(z)``
+    """
+    p = sp.Wild("p")
+    z = sp.Wild("z")
+    n = sp.Wild("n")
+    a = sp.Wild("a")
+    if not isinstance(f, sp.Expr):
+        return f
+    if not (f.has(ZTransform) or f.has(InverseZTransform) or f.has(sp.Sum)):
+        return f
+
+    for y, Y in fdict.items():
+        if (m := f.match(ZTransform(y(a), n, z))) is not None and m[a] == m[n]:
+            return Y(m[z])
+        if (m := f.match(InverseZTransform(Y(a), z, n))) is not None and m[a] == m[z]:
+            return y(m[n])
+        if (m := f.match(sp.Sum(y(a) * p ** (-a), (a, 0, sp.oo)))) is not None:
+            return Y(m[p])
+
+    func = f.func
+    args = [z_correspondence(arg, fdict) for arg in f.args]
+    return func(*args)
+
+
+def z_initial_conds(f, n, fdict, /):
+    """Replace discrete initial conditions in Z-domain expressions.
+
+    Similar to SymPy's ``laplace_initial_conds`` but for sequences:
+    given ``{y: [y0, y1, y2, ...]}`` this replaces ``y(0)``, ``y(1)``,
+    ``y(2)``, ... in ``f``.
+
+    Parameters
+    ----------
+    f : sympy expression
+        Expression containing discrete initial condition terms.
+    n : sympy expression
+        Discrete index symbol (kept for API symmetry).
+    fdict : dict
+        Dictionary mapping functions to ordered initial values.
+        Example: ``{y: [2, 4, 8]}`` means ``y(0)=2, y(1)=4, y(2)=8``.
+    """
+    _ = n  # API symmetry with laplace_initial_conds-style helpers.
+    for y, ic in fdict.items():
+        for k in range(len(ic)):
+            f = f.replace(y(sp.Integer(k)), ic[k])
+    return f
 
 
 def _select_piecewise_branch(piecewise_expr):

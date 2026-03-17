@@ -1,6 +1,14 @@
 import sympy as sp
 
-from z_transform import KroneckerDelta, inverse_z_transform, z_transform
+from z_transform import (
+    InverseZTransform,
+    KroneckerDelta,
+    ZTransform,
+    inverse_z_transform,
+    z_correspondence,
+    z_initial_conds,
+    z_transform,
+)
 
 
 def test_inverse_geometric_symbolic_parameter():
@@ -87,3 +95,49 @@ def test_undef_function_forward_shift_twice():
     got = z_transform(y(n + 2), n=n, z=z)
     expected = z ** 2 * Y(z) - z ** 2 * y(0) - z * y(1)
     assert sp.simplify(got - expected) == 0
+
+
+def test_z_correspondence_for_symbolic_placeholders():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    y = sp.Function("y")
+    Y = sp.Function("Y")
+    x = sp.Function("x")
+    X = sp.Function("X")
+
+    expr = ZTransform(y(n), n, z) + InverseZTransform(X(z), z, n)
+    got = z_correspondence(expr, {y: Y, x: X})
+    expected = Y(z) + x(n)
+    assert sp.simplify(got - expected) == 0
+
+
+def test_z_correspondence_for_unevaluated_sum_form():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    y = sp.Function("y")
+    Y = sp.Function("Y")
+
+    expr = z_transform(y(n), n=n, z=z, evaluate=False)
+    got = z_correspondence(expr, {y: Y})
+    assert got == Y(z)
+
+
+def test_z_initial_conds_for_forward_shift_terms():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    y = sp.Function("y")
+    Y = sp.Function("Y")
+
+    expr = z_transform(y(n + 2), n=n, z=z)
+    with_corr = z_initial_conds(expr, n, {y: [2, 4]})
+    expected = z ** 2 * Y(z) - 2 * z ** 2 - 4 * z
+    assert sp.simplify(with_corr - expected) == 0
+
+
+def test_z_initial_conds_replaces_only_declared_functions():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    y = sp.Function("y")
+    x = sp.Function("x")
+    Y = sp.Function("Y")
+
+    expr = z_transform(y(n + 1), n=n, z=z) + x(0)
+    with_corr = z_initial_conds(expr, n, {y: [3]})
+    expected = z * Y(z) - 3 * z + x(0)
+    assert sp.simplify(with_corr - expected) == 0
