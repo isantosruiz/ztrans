@@ -360,28 +360,34 @@ def _build_undef_function_closed_form(term, n, z, lower, upper):
 
 
 def z_transform(x, n=None, z=None, evaluate=True, noconds=True):
-    """Compute the unilateral Z-transform of a discrete-time sequence.
+    """Return the unilateral Z-transform of a discrete-time sequence.
 
     The unilateral transform is:
-        X(z) = sum(x[n] * z**(-n), n=0..oo)
+    ``X(z) = sum(x[n] * z**(-n), (n, 0, oo))``.
 
-    Parameters
-    ----------
-    x : sympy.Expr, callable, str, list, or tuple
-        Input sequence representation.
-    n : sympy.Symbol, optional
-        Discrete-time index symbol. Defaults to integer nonnegative n.
-    z : sympy.Symbol, optional
-        Transform variable. Defaults to z.
-    evaluate : bool, optional
-        If True, evaluate and simplify the summation.
-    noconds : bool, optional
-        If True, return only Xz. If False, return (Xz, condition).
-
-    Returns
-    -------
-    sympy.Expr or tuple[sympy.Expr, sympy.Expr]
-        The transform, optionally with convergence/support condition.
+    :param x:
+        Input sequence representation. Supported values are a SymPy expression,
+        callable, string expression, or a finite ``list``/``tuple``.
+    :type x: sympy.Expr | callable | str | list | tuple
+    :param n:
+        Discrete-time index symbol. If omitted, a nonnegative integer symbol
+        named ``n`` is created.
+    :type n: sympy.Symbol | None
+    :param z:
+        Transform variable. If omitted, a symbol named ``z`` is created.
+    :type z: sympy.Symbol | None
+    :param evaluate:
+        If ``True``, evaluate/simplify the transform. If ``False``, return an
+        unevaluated summation.
+    :type evaluate: bool
+    :param noconds:
+        If ``True`` (default), return only ``X(z)``. If ``False``, return
+        ``(X(z), condition)``.
+    :type noconds: bool
+    :returns:
+        The Z-transform expression, optionally with convergence/support
+        condition.
+    :rtype: sympy.Expr | tuple[sympy.Expr, sympy.Expr]
     """
     n = n or sp.symbols("n", integer=True, nonnegative=True)
     z = z or sp.symbols("z")
