@@ -23,6 +23,13 @@ def test_inverse_constant_is_delta():
     assert got == KroneckerDelta(n)
 
 
+def test_inverse_preserves_delta_plus_constant():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    got = inverse_z_transform(1 + z / (z - 1), z=z, n=n)
+    expected = 1 + KroneckerDelta(n)
+    assert sp.simplify(got - expected) == 0
+
+
 def test_round_trip_power_sequence():
     z, n = sp.symbols("z n", integer=True, nonnegative=True)
     F = z_transform(lambda k: 2**k, n=n, z=z)

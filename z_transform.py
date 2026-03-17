@@ -447,6 +447,53 @@ def z_transform(x, n=None, z=None, evaluate=True, noconds=True):
     return _pack(xz, cond)
 
 
+def _pole_order_at_zero(Fz, z):
+    """Return the pole order of Fz at z=0 (0 if no pole / unknown)."""
+    try:
+        num, den = sp.fraction(sp.together(Fz))
+        p_num = sp.Poly(sp.expand(num), z)
+        p_den = sp.Poly(sp.expand(den), z)
+
+        v_num = min(exp[0] for exp, coeff in p_num.terms() if coeff != 0)
+        v_den = min(exp[0] for exp, coeff in p_den.terms() if coeff != 0)
+        return max(0, int(v_den - v_num))
+    except Exception:
+        return 0
+
+
+def _extract_zero_pole_delta_terms(Fz, z, n):
+    """Extract z=0 principal-part terms and map them to shifted deltas.
+
+    If ``Fz`` contains terms ``a_k * z**(-k)`` then they contribute
+    ``a_k * KroneckerDelta(n-k)`` in the unilateral inverse Z-transform.
+    """
+    order = _pole_order_at_zero(Fz, z)
+    if order <= 0:
+        return sp.Integer(0), Fz
+
+    try:
+        laurent = sp.series(Fz, z, 0, order + 1).removeO()
+    except Exception:
+        return sp.Integer(0), Fz
+
+    principal = sp.Integer(0)
+    delta_terms = sp.Integer(0)
+    expanded = sp.expand(laurent)
+
+    for k in range(1, order + 1):
+        coeff = sp.simplify(expanded.coeff(z, -k))
+        if coeff == 0:
+            continue
+        principal += coeff * z ** (-k)
+        delta_terms += coeff * KroneckerDelta(n - k)
+
+    if principal == 0:
+        return sp.Integer(0), Fz
+
+    reduced = sp.simplify(Fz - principal)
+    return sp.simplify(delta_terms), reduced
+
+
 def inverse_z_transform(F, z=None, n=None):
     """Compute the unilateral inverse Z-transform by residue summation.
 
@@ -483,10 +530,22 @@ def inverse_z_transform(F, z=None, n=None):
         Fz = sp.sympify(F)
 
     Fz = sp.simplify(sp.expand(Fz))
-    den = sp.denom(sp.together(Fz))
-    poles = list(sp.roots(den, z).keys())
-    if not poles and not Fz.has(z):
-        return sp.simplify(Fz * KroneckerDelta(n))
+    delta_terms, Fz_residual = _extract_zero_pole_delta_terms(Fz, z, n)
 
-    residues = [sp.residue(Fz * z ** (n - 1), z, p) for p in poles]
-    return sp.simplify(sp.Add(*residues))
+    den = sp.denom(sp.together(Fz_residual))
+    poles = [p for p in sp.roots(den, z).keys() if p != 0]
+    residues = [sp.residue(Fz_residual * z ** (n - 1), z, p) for p in poles]
+    xn = sp.simplify(sp.Add(*residues) + delta_terms)
+
+    # Correct n=0 sample from the high-frequency gain X(oo):
+    # x[0] = lim_{z->oo} X(z).
+    try:
+        x0 = sp.simplify(sp.limit(Fz, z, sp.oo))
+        r0 = sp.simplify(xn.subs(n, 0))
+        correction = sp.simplify(x0 - r0)
+        if correction != 0 and not correction.has(sp.oo, sp.zoo, sp.nan):
+            xn = sp.simplify(xn + correction * KroneckerDelta(n))
+    except Exception:
+        pass
+
+    return xn
