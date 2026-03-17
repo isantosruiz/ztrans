@@ -52,7 +52,8 @@ Y = sp.Function("Y")
 formal = ZTransform(y(n), n, z) + InverseZTransform(Y(z), z, n)
 print(z_correspondence(formal, {y: Y}))  # Y(z) + y(n)
 
-expr = z_transform(y(n + 2), n=n, z=z)   # z**2*Y(z) - z**2*y(0) - z*y(1)
+expr = z_transform(y(n + 2), n=n, z=z)   # z**2*ZTransform(y(n), n, z) - z**2*y(0) - z*y(1)
+expr = z_correspondence(expr, {y: Y})     # z**2*Y(z) - z**2*y(0) - z*y(1)
 print(z_initial_conds(expr, n, {y: [2, 4]}))  # z**2*Y(z) - 2*z**2 - 4*z
 ```
 

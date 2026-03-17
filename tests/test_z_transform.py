@@ -66,42 +66,45 @@ def test_cos_shifted_transform_uses_closed_form():
 def test_undef_function_shift_property():
     z, n = sp.symbols("z n", integer=True, nonnegative=True)
     y = sp.Function("y")
-    Y = sp.Function("Y")
     x = y(n) + y(n - 2)
 
     got = z_transform(x, n=n, z=z)
-    expected = Y(z) + z ** (-2) * Y(z)
+    expected = ZTransform(y(n), n, z) + z ** (-2) * ZTransform(y(n), n, z)
     assert sp.simplify(got - expected) == 0
 
 
 def test_undef_function_shift_property_with_coefficient():
     z, n = sp.symbols("z n", integer=True, nonnegative=True)
     y = sp.Function("y")
-    Y = sp.Function("Y")
 
     got = z_transform(3 * y(n - 1), n=n, z=z)
-    expected = 3 * z ** (-1) * Y(z)
+    expected = 3 * z ** (-1) * ZTransform(y(n), n, z)
     assert sp.simplify(got - expected) == 0
 
 
 def test_undef_function_forward_shift_once():
     z, n = sp.symbols("z n", integer=True, nonnegative=True)
     y = sp.Function("y")
-    Y = sp.Function("Y")
 
     got = z_transform(y(n + 1), n=n, z=z)
-    expected = z * Y(z) - z * y(0)
+    expected = z * ZTransform(y(n), n, z) - z * y(0)
     assert sp.simplify(got - expected) == 0
 
 
 def test_undef_function_forward_shift_twice():
     z, n = sp.symbols("z n", integer=True, nonnegative=True)
     y = sp.Function("y")
-    Y = sp.Function("Y")
 
     got = z_transform(y(n + 2), n=n, z=z)
-    expected = z ** 2 * Y(z) - z ** 2 * y(0) - z * y(1)
+    expected = z ** 2 * ZTransform(y(n), n, z) - z ** 2 * y(0) - z * y(1)
     assert sp.simplify(got - expected) == 0
+
+
+def test_z_transform_undef_without_correspondence_uses_placeholder():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    y = sp.Function("y")
+    got = z_transform(y(n), n=n, z=z)
+    assert got == ZTransform(y(n), n, z)
 
 
 def test_z_correspondence_for_symbolic_placeholders():
@@ -133,6 +136,7 @@ def test_z_initial_conds_for_forward_shift_terms():
     Y = sp.Function("Y")
 
     expr = z_transform(y(n + 2), n=n, z=z)
+    expr = z_correspondence(expr, {y: Y})
     with_corr = z_initial_conds(expr, n, {y: [2, 4]})
     expected = z ** 2 * Y(z) - 2 * z ** 2 - 4 * z
     assert sp.simplify(with_corr - expected) == 0
@@ -145,6 +149,7 @@ def test_z_initial_conds_replaces_only_declared_functions():
     Y = sp.Function("Y")
 
     expr = z_transform(y(n + 1), n=n, z=z) + x(0)
+    expr = z_correspondence(expr, {y: Y})
     with_corr = z_initial_conds(expr, n, {y: [3]})
     expected = z * Y(z) - 3 * z + x(0)
     assert sp.simplify(with_corr - expected) == 0

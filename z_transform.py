@@ -337,8 +337,7 @@ def _build_undef_function_closed_form(term, n, z, lower, upper):
     if coeff.has(n):
         return None
 
-    formal_name = fn.func.__name__.upper()
-    formal = sp.Function(formal_name)(z)
+    formal = ZTransform(fn.func(n), n, z)
 
     if shift == 0:
         return sp.simplify(coeff * formal)
@@ -347,11 +346,11 @@ def _build_undef_function_closed_form(term, n, z, lower, upper):
         return None
 
     if shift.is_negative is True:
-        # Delay: y(n-k) -> z**(-k) Y(z), k > 0.
+        # Delay: y(n-k) -> z**(-k) ZTransform(y(n), n, z), k > 0.
         return sp.simplify(coeff * z ** shift * formal)
 
     if shift.is_nonnegative is True:
-        # Advance: y(n+k) -> z**k Y(z) - sum_{m=0}^{k-1} z**(k-m) y(m), k > 0.
+        # Advance: y(n+k) -> z**k*ZTransform(y(n), n, z) - sum(...), k > 0.
         m = sp.symbols("m", integer=True, nonnegative=True)
         correction = sp.summation(z ** (shift - m) * fn.func(m), (m, 0, shift - 1))
         return sp.simplify(coeff * (z ** shift * formal - correction))
