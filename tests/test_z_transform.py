@@ -30,6 +30,26 @@ def test_inverse_preserves_delta_plus_constant():
     assert sp.simplify(got - expected) == 0
 
 
+def test_inverse_formal_correspondence_shift_delay():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    Y = sp.Function("Y")
+    y = sp.Function("y")
+
+    got = inverse_z_transform(Y(z) / z ** 3, z=z, n=n)
+    expected = y(n - 3)
+    assert sp.simplify(got - expected) == 0
+
+
+def test_inverse_formal_correspondence_mixed_with_rational():
+    z, n = sp.symbols("z n", integer=True, nonnegative=True)
+    Y = sp.Function("Y")
+    y = sp.Function("y")
+
+    got = inverse_z_transform(1 + Y(z) / z ** 3, z=z, n=n)
+    expected = KroneckerDelta(n) + y(n - 3)
+    assert sp.simplify(got - expected) == 0
+
+
 def test_round_trip_power_sequence():
     z, n = sp.symbols("z n", integer=True, nonnegative=True)
     F = z_transform(lambda k: 2**k, n=n, z=z)

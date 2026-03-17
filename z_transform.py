@@ -493,6 +493,34 @@ def _extract_zero_pole_delta_terms(Fz, z, n):
     return sp.simplify(delta_terms), reduced
 
 
+def _inverse_undef_function_term(term, z, n):
+    """Invert terms like c*z**k*Y(z) into c*y(n+k) when possible."""
+    factors = list(sp.Mul.make_args(term))
+    undef = [
+        f
+        for f in factors
+        if isinstance(f, AppliedUndef) and len(f.args) == 1 and f.args[0] == z
+    ]
+    if len(undef) != 1:
+        return None
+
+    Fz = undef[0]
+    coeff = sp.simplify(sp.Mul(*[f for f in factors if f != Fz]))
+    if coeff.has(sp.zoo, sp.oo, sp.nan):
+        return None
+
+    powers = coeff.as_powers_dict()
+    shift = sp.simplify(powers.pop(z, sp.Integer(0)))
+    rest = sp.simplify(sp.Mul(*[base ** exp for base, exp in powers.items()]))
+
+    # Only monomial powers in z are mapped here. Other forms stay unevaluated.
+    if rest.has(z) or shift.is_integer is not True:
+        return InverseZTransform(term, z, n)
+
+    y = sp.Function(Fz.func.__name__.lower())
+    return sp.simplify(rest * y(n + shift))
+
+
 def inverse_z_transform(F, z=None, n=None):
     """Compute the unilateral inverse Z-transform by residue summation.
 
@@ -529,22 +557,32 @@ def inverse_z_transform(F, z=None, n=None):
         Fz = sp.sympify(F)
 
     Fz = sp.simplify(sp.expand(Fz))
-    delta_terms, Fz_residual = _extract_zero_pole_delta_terms(Fz, z, n)
+    formal_parts = []
+    residual_terms = []
+
+    for term in sp.expand(Fz).as_ordered_terms():
+        formal = _inverse_undef_function_term(term, z, n)
+        if formal is not None:
+            formal_parts.append(formal)
+            continue
+        residual_terms.append(term)
+
+    Fz_residual_input = sp.simplify(sp.Add(*residual_terms))
+    delta_terms, Fz_residual = _extract_zero_pole_delta_terms(Fz_residual_input, z, n)
 
     den = sp.denom(sp.together(Fz_residual))
     poles = [p for p in sp.roots(den, z).keys() if p != 0]
     residues = [sp.residue(Fz_residual * z ** (n - 1), z, p) for p in poles]
-    xn = sp.simplify(sp.Add(*residues) + delta_terms)
+    xn_residual = sp.simplify(sp.Add(*residues) + delta_terms)
 
-    # Correct n=0 sample from the high-frequency gain X(oo):
-    # x[0] = lim_{z->oo} X(z).
+    # Correct n=0 sample from high-frequency gain of residual rational part.
     try:
-        x0 = sp.simplify(sp.limit(Fz, z, sp.oo))
-        r0 = sp.simplify(xn.subs(n, 0))
+        x0 = sp.simplify(sp.limit(Fz_residual_input, z, sp.oo))
+        r0 = sp.simplify(xn_residual.subs(n, 0))
         correction = sp.simplify(x0 - r0)
         if correction != 0 and not correction.has(sp.oo, sp.zoo, sp.nan):
-            xn = sp.simplify(xn + correction * KroneckerDelta(n))
+            xn_residual = sp.simplify(xn_residual + correction * KroneckerDelta(n))
     except Exception:
         pass
 
-    return xn
+    return sp.simplify(xn_residual + sp.Add(*formal_parts))
