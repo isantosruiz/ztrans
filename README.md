@@ -37,7 +37,9 @@ from z_transform import (
     z_transform,
 )
 
-n, z, a = sp.symbols("n z a", integer=True, nonnegative=True)
+z = sp.symbols("z")
+a = sp.symbols("a", real=True)
+n, k = sp.symbols("n k", integer=True, nonnegative=True)
 
 F = z_transform(lambda k: a**k, n=n, z=z)
 print(F)  # z/(z - a)
