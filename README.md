@@ -1,20 +1,20 @@
 # ztrans
 
-Utilidades simbólicas para transformada Z unilateral en SymPy.
+Symbolic utilities for unilateral Z-transforms in SymPy.
 
-Incluye:
-- `z_transform(...)` con opción `noconds=True` por omisión.
-- `inverse_z_transform(...)` por suma de residuos en el plano-Z.
-- `z_correspondence(...)` para reemplazo formal tipo `y(n) <-> Y(z)`.
-- `z_initial_conds(...)` para sustituir condiciones iniciales discretas.
-- soporte de entrada como `sympy.Expr`, `str`, `callable` y secuencias finitas.
+Includes:
+- `z_transform(...)` with `noconds=True` by default.
+- `inverse_z_transform(...)` via residue summation in the Z-plane.
+- `z_correspondence(...)` for formal replacement mappings such as `y(n) <-> Y(z)`.
+- `z_initial_conds(...)` for substituting discrete initial conditions.
+- Input support for `sympy.Expr`, `str`, `callable`, and finite sequences.
 
-## Requisitos
+## Requirements
 
 - Python 3.10+
-- Dependencias en `requirements.txt`
+- Dependencies listed in `requirements.txt`
 
-## Instalación local
+## Local Setup
 
 ```bash
 python3 -m venv .venv
@@ -23,7 +23,7 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## Uso rápido
+## Quick Start
 
 ```python
 import sympy as sp
@@ -65,7 +65,7 @@ print(z_initial_conds(expr, n, {y: [2, 4]}))  # z**2*Y(z) - 2*z**2 - 4*z
 python -m pytest -q
 ```
 
-## Estructura
+## Project Structure
 
 ```text
 z_transform.py
