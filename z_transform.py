@@ -14,18 +14,31 @@ __all__ = [
 
 
 def KroneckerDelta(a, b=0):
-    """Return Kronecker delta with default second argument b=0."""
+    """Return a Kronecker delta with default second argument ``b=0``.
+
+    Parameters
+    ----------
+    a : sympy.Expr
+        First argument of the delta.
+    b : sympy.Expr, optional
+        Second argument of the delta. Defaults to zero.
+
+    Returns
+    -------
+    sympy.functions.special.tensor_functions.KroneckerDelta
+        SymPy Kronecker-delta expression.
+    """
     return _SympyKroneckerDelta(a, b)
 
 
 class ZTransform(sp.Function):
-    """Symbolic placeholder for unevaluated unilateral Z-transform."""
+    """Symbolic placeholder for an unevaluated unilateral Z-transform."""
 
     nargs = (3,)
 
 
 class InverseZTransform(sp.Function):
-    """Symbolic placeholder for unevaluated unilateral inverse Z-transform."""
+    """Symbolic placeholder for an unevaluated unilateral inverse Z-transform."""
 
     nargs = (3,)
 
@@ -33,10 +46,27 @@ class InverseZTransform(sp.Function):
 def z_correspondence(f, fdict, /):
     """Replace formal Z-transform placeholders using function correspondences.
 
-    Similar to SymPy's ``laplace_correspondence``:
-    - ``ZTransform(y(n), n, z)`` -> ``Y(z)``
-    - ``InverseZTransform(Y(z), z, n)`` -> ``y(n)``
-    - ``Sum(y(n)*z**(-n), (n, 0, oo))`` -> ``Y(z)``
+    Similar to SymPy's ``laplace_correspondence``, this helper maps formal
+    transform objects into user-selected Z-domain and time-domain functions.
+
+    Examples
+    --------
+    - ``ZTransform(y(n), n, z)`` maps to ``Y(z)``.
+    - ``InverseZTransform(Y(z), z, n)`` maps to ``y(n)``.
+    - ``Sum(y(n)*z**(-n), (n, 0, oo))`` maps to ``Y(z)``.
+
+    Parameters
+    ----------
+    f : sympy.Expr
+        Expression containing formal transform placeholders.
+    fdict : dict
+        Mapping from time-domain functions to Z-domain functions, for example
+        ``{y: Y}``.
+
+    Returns
+    -------
+    sympy.Expr
+        Expression with matching formal placeholders replaced.
     """
     p = sp.Wild("p")
     z = sp.Wild("z")

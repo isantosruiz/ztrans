@@ -1,5 +1,6 @@
 import sympy as sp
 
+import ztrans
 from z_transform import (
     InverseZTransform,
     KroneckerDelta,
@@ -9,6 +10,11 @@ from z_transform import (
     z_initial_conds,
     z_transform,
 )
+
+
+def test_package_import_exposes_public_api():
+    assert ztrans.z_transform is z_transform
+    assert ztrans.inverse_z_transform is inverse_z_transform
 
 
 def test_inverse_geometric_symbolic_parameter():

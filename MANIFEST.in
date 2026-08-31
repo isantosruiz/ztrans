@@ -1,0 +1,9 @@
+include README.md
+include LICENSE
+include CITATION.cff
+include CHANGELOG.md
+include CODE_OF_CONDUCT.md
+include CONTRIBUTING.md
+include .zenodo.json
+recursive-include docs *.md
+include mkdocs.yml

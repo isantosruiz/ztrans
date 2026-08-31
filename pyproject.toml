@@ -1,3 +1,72 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ztrans"
+version = "0.1.0"
+description = "Symbolic utilities for unilateral Z-transforms in SymPy."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [
+    { name = "Ildeberto Santos-Ruiz" },
+]
+keywords = [
+    "z-transform",
+    "sympy",
+    "symbolic-computation",
+    "signal-processing",
+    "control-systems",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Education",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Mathematics",
+]
+dependencies = [
+    "sympy>=1.12,<2",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8,<9",
+]
+dev = [
+    "build>=1.2",
+    "pytest>=8,<9",
+    "ruff>=0.8",
+]
+docs = [
+    "mkdocs>=1.6",
+]
+
+[project.urls]
+Homepage = "https://github.com/isantosruiz/ztrans"
+Repository = "https://github.com/isantosruiz/ztrans"
+Issues = "https://github.com/isantosruiz/ztrans/issues"
+
+[tool.setuptools]
+py-modules = ["z_transform"]
+
+[tool.setuptools.packages.find]
+include = ["ztrans*"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

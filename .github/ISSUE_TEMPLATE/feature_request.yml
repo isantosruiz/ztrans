@@ -1,0 +1,24 @@
+name: Feature request
+description: Suggest a new transform rule, API improvement, or documentation addition.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What problem would this feature solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior, API, or mathematical rule you suggest.
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: References or examples
+      description: Add papers, textbooks, SymPy examples, or code examples if useful.

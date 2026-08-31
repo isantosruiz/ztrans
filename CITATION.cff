@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: "If you use ztrans in research or teaching materials, please cite it using these metadata."
+title: "ztrans: Symbolic utilities for unilateral Z-transforms in SymPy"
+type: software
+authors:
+  - family-names: "Santos-Ruiz"
+    given-names: "Ildeberto"
+repository-code: "https://github.com/isantosruiz/ztrans"
+url: "https://github.com/isantosruiz/ztrans"
+license: "MIT"
+version: "0.1.0"
+date-released: "2026-03-03"
+keywords:
+  - "Z-transform"
+  - "SymPy"
+  - "symbolic computation"
+  - "discrete-time systems"

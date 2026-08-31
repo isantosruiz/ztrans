@@ -1,0 +1,18 @@
+site_name: ztrans
+site_description: Symbolic utilities for unilateral Z-transforms in SymPy.
+site_url: https://isantosruiz.github.io/ztrans/
+repo_url: https://github.com/isantosruiz/ztrans
+repo_name: isantosruiz/ztrans
+nav:
+  - Home: index.md
+  - Quickstart: tutorials/quickstart.md
+  - API: api.md
+  - Development: development.md
+  - Review Readiness: review-readiness.md
+theme:
+  name: mkdocs
+markdown_extensions:
+  - toc:
+      permalink: true
+  - tables
+  - fenced_code

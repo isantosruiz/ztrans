@@ -1,0 +1,19 @@
+{
+  "title": "ztrans: Symbolic utilities for unilateral Z-transforms in SymPy",
+  "creators": [
+    {
+      "name": "Santos-Ruiz, Ildeberto"
+    }
+  ],
+  "description": "Symbolic utilities for unilateral Z-transforms in SymPy.",
+  "license": "MIT",
+  "keywords": [
+    "Z-transform",
+    "SymPy",
+    "symbolic computation",
+    "discrete-time systems",
+    "signal processing",
+    "control systems"
+  ],
+  "upload_type": "software"
+}
