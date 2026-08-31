@@ -8,14 +8,14 @@
 in discrete-time signal processing, control systems, recurrence equations, and
 teaching workflows.
 
-The repository currently includes:
+The package provides:
 
 - `z_transform(...)` with `noconds=True` by default.
 - `inverse_z_transform(...)` for rational Z-domain expressions by residue summation.
 - `z_correspondence(...)` for formal replacement mappings such as `y(n) <-> Y(z)`.
 - `z_initial_conds(...)` for substituting discrete initial conditions.
 - Input support for `sympy.Expr`, `str`, `callable`, and finite sequences.
-- Compatibility imports through both `from z_transform import ...` and `import ztrans`.
+- Package-level imports through `import ztrans` or `from ztrans import ...`.
 
 ## Why this package?
 
@@ -49,7 +49,7 @@ python -m pip install -e ".[dev]"
 
 ```python
 import sympy as sp
-from z_transform import (
+from ztrans import (
     InverseZTransform,
     KroneckerDelta,
     ZTransform,

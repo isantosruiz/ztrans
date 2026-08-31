@@ -32,14 +32,14 @@ python -m pip install -e ".[dev]"
 
 ## Import
 
-The recommended package import is:
+Use the package namespace for most workflows:
 
 ```python
 import ztrans
 ```
 
-The original module import remains available:
+For concise scripts and notebooks, import the public functions directly:
 
 ```python
-from z_transform import z_transform, inverse_z_transform
+from ztrans import z_transform, inverse_z_transform
 ```

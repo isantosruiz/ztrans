@@ -1,8 +1,4 @@
-"""Public package interface for ztrans.
-
-The project keeps ``z_transform.py`` as a compatibility module while also
-providing the package import ``import ztrans`` for packaging and review tools.
-"""
+"""Public package interface for ztrans."""
 
 from z_transform import (
     InverseZTransform,

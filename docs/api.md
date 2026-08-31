@@ -1,6 +1,6 @@
 # API Overview
 
-The public API is available from both `ztrans` and `z_transform`.
+The public API is available from the `ztrans` package namespace.
 
 ## z_transform
 
